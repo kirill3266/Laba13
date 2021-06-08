@@ -3,8 +3,11 @@
 
 class Polynom
 {
+	int* coef;
+	int deg;
 public:
 	Polynom();
+	Polynom(const int right[],const int size);
 	Polynom(const Polynom& right);
 	Polynom(int deg);
 	Polynom operator+(const Polynom& right) const;
@@ -23,8 +26,5 @@ public:
 	void input();
 	void output();
 	~Polynom();
-private:
-	int* coef;
-	int deg;
 };
 #endif

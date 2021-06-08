@@ -1,9 +1,17 @@
 #include "Laba13.h"
 #include <iostream>
-#include <cmath>
+
+
 Polynom::Polynom() {//+
 	coef = nullptr;
 	deg = 0;
+}
+
+Polynom::Polynom(const int right[], const int size) {
+	deg = size;
+	coef = new int[deg];
+	for (int i = 0; i < deg; i++)
+		coef[i] = right[i];
 }
 
 Polynom::Polynom(int size) {//+
@@ -61,36 +69,8 @@ Polynom Polynom::operator+(const Polynom& right) const {
 }
 
 Polynom Polynom::operator-(const Polynom& right) const {//+
-	if (deg == 0) return Polynom();
-	else if (right.deg == 0) return *this;
-	int polynom_res_size = deg > right.deg ? deg : right.deg;
-	Polynom polynom_res(polynom_res_size);
-	if (deg == right.deg)
-		for (int i = 0; i < deg; ++i)
-			polynom_res.coef[i] = coef[i] - right.coef[i];
-	else if (deg > right.deg) {
-		int j = 0;
-		for (int i = 0; i < deg; ++i)
-			if (j < right.deg && i >= deg - right.deg)polynom_res.coef[i] = coef[i] - right.coef[j++];
-			else polynom_res.coef[i] = coef[i];
-	}
-	else {
-		int j = 0;
-		for (int i = 0; i < right.deg; ++i)
-			if (j < deg&&i>=right.deg-deg)polynom_res.coef[i] = coef[j++] - right.coef[i];
-			else polynom_res.coef[i] = -right.coef[i];
-	}
-	int counter = 0;//счётчик нулей
-	for (int i = 0; i < deg; i++)
-		if (coef[i] == 0) {
-			counter++;
-		}
-	if (counter == polynom_res.deg) {
-		polynom_res.deg = 0;
-		delete[]polynom_res.coef;
-		polynom_res.coef = nullptr;
-	}
-	return  polynom_res;
+	int mas[] = { -1 };
+	return *this+right*Polynom(mas,1);
 }
 
 Polynom Polynom::operator*(const Polynom& right) const {//+
@@ -106,128 +86,17 @@ Polynom Polynom::operator*(const Polynom& right) const {//+
 }
 
 Polynom& Polynom::operator+=(const Polynom& right) {
-	if (right.deg > 0 && deg == right.deg)//для одинаковых степеней
-		for (int i = 0; i < right.deg; i++)
-			coef[i] += right.coef[i];
-	else if (right.deg > 0 && deg > 0 && deg != right.deg) {//для разных степеней
-		if (deg < right.deg) {//увеличение *this для вывода результата
-			int* buff = new int[deg];
-			int buff_size = deg;
-			for (int i = 0; i < deg; i++)
-				buff[i] = coef[i];
-			delete[] coef;
-			coef = new int[right.deg];
-			int j = buff_size - 1;
-			for (int i = right.deg - 1; i > -1; i--) {
-				if (i >= j && j >= 0) coef[i] = buff[j--];
-				else coef[i] = 0;
-			}
-			delete[] buff;
-
-			for (int i = 0; i < right.deg; i++)//непосредственно сложение??
-				coef[i] += right.coef[i];
-			deg = right.deg;
-		}
-		else {
-			int j = 0;
-			for (int i = deg - right.deg; i < deg; i++)
-				if (j < right.deg) coef[i] += right.coef[j++];
-		}
-	}
-	else if (right.deg == 0 || deg == 0)//не выполняет никаких операций, если один из компонентов не определён
-		return *this;
-
-	//определение  нулевых значений
-	int counter = 0;//счётчик нулей
-	for (int i = 0; i < deg; i++)
-		if (coef[i] == 0) {
-			counter++;
-		}
-	if (counter == deg) {
-		deg = 0;
-		delete[]coef;
-		coef = nullptr;
-	}
-	return *this;
+	return *this = *this + right;
+	
 }
 
 Polynom& Polynom::operator-=(const Polynom& right) {//+
-	if (right.deg > 0 && deg == right.deg)//для одинаковых степеней
-		for (int i = 0; i < right.deg; i++)
-			coef[i] -= right.coef[i];
-	else if (right.deg > 0 && deg > 0 && deg != right.deg) {//для разных степеней
-		if (deg < right.deg) {//увеличение *this для вывода результата
-			int* buff = new int[deg];
-			int buff_size = deg;
-			for (int i = 0; i < deg; i++)
-				buff[i] = coef[i];
-			delete[] coef;
-			coef = new int[right.deg];
-			int j = buff_size - 1;
-			for (int i = right.deg - 1; i > -1; i--) {
-				if (i >= j && j >= 0) coef[i] = buff[j--];
-				else coef[i] = 0;
-			}
-			delete[] buff;
-			for (int i = right.deg - deg - 1; i < right.deg; i++)//непосредственно вычитание
-				coef[i] -= right.coef[i];
-			deg = right.deg;
-		}
-		else {
-			int j = 0;
-			for (int i = deg - right.deg; i < deg; i++)
-				if (j < right.deg) coef[i] -= right.coef[j++];
-		}
-	}
-	else if (right.deg == 0 || deg == 0)//не выполняет никаких операций, если один из компонентов не определён
-		return *this;
-
-	//определение  нулевых значений
-	int counter = 0;//счётчик нулей
-	for (int i = 0; i < deg; i++)
-		if (coef[i] == 0) {
-			counter++;
-		}
-	//if (counter > 0 && counter != deg) {
-	//	int* buff = new int[deg - counter];
-	//	int k = 0;
-	//	for (int i = 0; i < deg; i++) //копирование без нулей
-	//		if (coef[i] != 0) {
-	//			buff[k] = coef[i];
-	//			k++;
-	//		}
-	//	delete[] coef;
-	//	deg -= counter;
-	//	coef = new int[deg];
-	//	for (int i = 0; i < deg; i++)
-	//		coef[i] = buff[i];
-	//	delete[] buff;
-	//}
-	if (counter == deg) {
-		deg = 0;
-		delete[]coef;
-		coef = nullptr;
-	}
-	return *this;
+	return *this = *this - right;
+	
 }
 
-Polynom& Polynom::operator*=(const Polynom right) {//++
-	if (deg == 0 || right.deg == 0) return *this;
-	int buff_size = deg + right.deg - 1;
-	int* buff = new int[buff_size];
-	for (int i = 0; i < buff_size; i++) buff[i] = 0;
-	for (int i = 0; i < deg; ++i) {
-		for (int j = 0; j < right.deg; ++j) {
-			buff[i + j] += coef[i] * right.coef[j];
-		}
-	}
-	delete[] coef;
-	deg = buff_size;
-	coef = new int[deg];
-	for (int i = 0; i < deg; i++)
-		coef[i] = buff[i];
-	delete[] buff;
-	return  *this;
+Polynom& Polynom::operator*=(const Polynom right) {
+	return *this = *this * right;//++
 }
 
 Polynom& Polynom::operator=(const Polynom& right) {//+
@@ -249,25 +118,15 @@ Polynom& Polynom::operator=(const Polynom& right) {//+
 }
 
 bool Polynom::operator==(const Polynom& right) const {//+
-	if (deg != right.deg) return false;
-	else for (int i = 0; i < deg; i++)
-		if (coef[i] != right.coef[i]) return false;
-	return true;
+	return !(*this < right) && !(right < *this);
 }
 
-bool Polynom::operator!=(const Polynom& right) const {//+
-	int i;
-	if (deg != right.deg) return true;
-	else for (i = 0; i < deg && coef[i] == right.coef[i]; i++);
-	return coef[i] - right.coef[i] == 0 ? false : true;
+bool Polynom::operator!=(const Polynom& right) const {
+	return !(*this == right);//+
 }
+
 bool Polynom::operator>(const Polynom& right) const {//+
-	if (deg < right.deg) return false;
-	else for (int i = 0; i < deg; i++) {
-		if (coef[i] == right.coef[i]) continue;
-		if (coef[i] > right.coef[i]) return true;
-	}
-	return false;
+	return !(*this < right) && (*this != right);
 }
 
 bool Polynom::operator<(const Polynom& right) const {//+
@@ -280,17 +139,11 @@ bool Polynom::operator<(const Polynom& right) const {//+
 }
 
 bool Polynom::operator>=(const Polynom& right) const {//+
-	int i;
-	if (deg < right.deg) return false;
-	else for (i = 0; i < deg && coef[i] == right.coef[i]; i++);
-	return coef[i] - right.coef[i] >= 0 ? true : false;
+	return (*this == right) || (*this > right);
 }
 
 bool Polynom::operator<=(const Polynom& right) const {//+
-	int i;
-	if (deg > right.deg) return false;
-	else for (i = 0; i < deg && coef[i] == right.coef[i]; i++);
-	return coef[i] - right.coef[i] > 0 ? false : true;
+	return (*this == right) || (*this < right);
 }
 
 void Polynom::input() {//+
@@ -303,7 +156,6 @@ void Polynom::input() {//+
 	while (ratio != 0) {
 		std::cin >> ratio;
 		mas[v] = ratio;
-		//std::cout << "Mas[" << v << "] is: " << mas[v] << "\n";
 		v++;
 		if (v == N - 1) {
 			N *= 10;
